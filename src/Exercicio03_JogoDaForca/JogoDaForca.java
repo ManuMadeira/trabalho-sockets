@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class JogoDaForca {
-    // Aqui eu mantenho a palavra secreta no servidor e troco mensagens de texto
+    // A palavra secreta permanece no servidor. Mensagens de texto sao trocadas
     // com o cliente ate ele ganhar, perder ou pedir para sair.
     private static final String[] PALAVRAS = {
             "concorrencia", "protocolo", "distribuido", "computador", "biblioteca"
@@ -31,8 +31,8 @@ public final class JogoDaForca {
             Thread worker = new Thread(() -> atenderJogo(servidor), "hangman-server");
             worker.setDaemon(true);
             worker.start();
-            // Aqui eu solicito o estabelecimento da conexao TCP com localhost na porta
-            // escolhida pelo servidor. IP identifica a maquina e a porta identifica o processo.
+            // O Socket estabelece a conexao TCP com localhost na porta escolhida
+            // pelo servidor. O IP identifica a maquina e a porta identifica o processo.
             try (Socket cliente = new Socket("127.0.0.1", servidor.getLocalPort());
                  BufferedReader entrada = new BufferedReader(new InputStreamReader(
                          cliente.getInputStream(), StandardCharsets.UTF_8));
@@ -122,8 +122,8 @@ public final class JogoDaForca {
                         + " | tentadas=" + tentadas + " | boneco=" + desenharBoneco(erros));
             }
         } catch (IOException e) {
-            // Em falhas de leitura, escrita ou encerramento inesperado eu trato a IOException
-            // sem confundir o erro da conexao com o funcionamento das demais partes do programa.
+            // Falhas de leitura, escrita ou encerramento inesperado geram IOException,
+            // tratada sem interferir nas demais partes do programa.
             System.err.println("Erro no servidor do Jogo da Forca: " + e.getMessage());
         }
     }

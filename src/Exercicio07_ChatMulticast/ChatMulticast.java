@@ -9,8 +9,8 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ChatMulticast {
-    // Aqui eu represento o participante de um chat UDP multicast.
-    // Nao existe ServerSocket nem handshake: eu entro no grupo IP e troco DatagramPacket.
+    // Esta classe representa um participante de um chat UDP multicast.
+    // Nao existe ServerSocket nem handshake: os participantes entram no grupo IP e trocam DatagramPacket.
     private static final String GRUPO = "230.0.0.1";
     private static final int PORTA = 4446;
     private static final int TAMANHO_MAXIMO = 8192;
@@ -19,12 +19,12 @@ public final class ChatMulticast {
     }
 
     public static void executar(Scanner scanner) throws IOException {
-        // Aqui eu resolvo o endereco multicast e uso o IP logico do grupo 230.0.0.1
-        // com a porta 4446 para identificar o conjunto de processos participantes.
+        // O endereco multicast e o IP logico do grupo 230.0.0.1; a porta 4446
+        // identifica o canal UDP usado pelos processos participantes.
         InetAddress grupo = InetAddress.getByName(GRUPO);
         AtomicBoolean conectado = new AtomicBoolean(true);
         try (MulticastSocket socket = new MulticastSocket(PORTA)) {
-            // Ao entrar no grupo, meu socket passa a receber datagramas UDP destinados
+            // Ao entrar no grupo, o socket passa a receber datagramas UDP destinados
             // ao grupo. Ao contrario do TCP, nao existe handshake ou conexao persistente.
             socket.joinGroup(grupo);
             System.out.printf("[MULTICAST] Participante entrou no grupo %s:%d.%n", GRUPO, PORTA);
@@ -49,7 +49,7 @@ public final class ChatMulticast {
                     System.out.println("Mensagem excede o limite de " + TAMANHO_MAXIMO + " bytes.");
                     continue;
                 }
-                // Eu serializo a mensagem em bytes e envio um DatagramPacket contendo dados,
+                // A mensagem e serializada em bytes e enviada em um DatagramPacket contendo dados,
                 // endereco IP do grupo e porta UDP de destino.
                 socket.send(new DatagramPacket(dados, dados.length, grupo, PORTA));
                 System.out.println("[CLIENTE] Mensagem enviada ao grupo: " + mensagem);

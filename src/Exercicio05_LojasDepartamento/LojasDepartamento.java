@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.LockSupport;
 
 public final class LojasDepartamento {
-    // Aqui eu represento a central e as filiais da rede distribuida.
+    // A central e as filiais representam os processos da rede distribuida.
     // A central usa um ServerSocket passivo e cada filial usa um Socket ativo.
     private static final int QUANTIDADE_FILIAIS = 5;
     private static final int TRANSACOES_POR_FILIAL = 1500;

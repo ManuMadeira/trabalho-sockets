@@ -17,8 +17,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Aqui eu implemento a ponta servidor do Exercício 1.
- * Minha tarefa é ficar aguardando clientes TCP na porta 5001 e responder
+ * Esta classe implementa a ponta servidor do Exercício 1.
+ * O servidor aguarda clientes TCP na porta 5001 e responde
  * aos comandos de texto do protocolo de fortunes.
  */
 public final class ServidorEx1 {
@@ -28,7 +28,7 @@ public final class ServidorEx1 {
     }
 
     public static void main(String[] args) {
-        // Aqui eu crio o ServerSocket: ele representa a porta passiva na qual
+        // O ServerSocket representa a porta passiva na qual
         // o servidor escuta conexoes e nao conversa diretamente com os clientes.
         try (ServerSocket servidor = new ServerSocket(PORTA)) {
             ExecutorService threads = Executors.newCachedThreadPool();
@@ -47,20 +47,20 @@ public final class ServidorEx1 {
 
             while (true) {
                 // Aqui o accept() fica bloqueado ate um cliente iniciar o handshake TCP.
-                // Quando chega uma conexao, eu obtenho um Socket ativo para aquele terminal.
+                // Quando chega uma conexao, um Socket ativo e criado para aquele terminal.
                 Socket cliente = servidor.accept();
                 System.out.printf("[CONEXAO] Novo cliente: IP %s / Porta remota %d%n",
                         cliente.getInetAddress().getHostAddress(), cliente.getPort());
                 threads.execute(() -> atenderCliente(cliente, fortunes));
             }
         } catch (IOException e) {
-            // Aqui eu trato falhas de abertura da porta, accept() ou encerramento da rede.
+            // Falhas de abertura da porta, accept() ou encerramento da rede sao tratadas aqui.
             System.err.println("[ERRO] Falha no servidor de Fortunes: " + e.getMessage());
         }
     }
 
     private static void atenderCliente(Socket cliente, List<String> fortunes) {
-        // Nesta thread eu trabalho com um unico cliente, mas varias threads podem
+        // Cada thread atende um unico cliente, mas varias threads podem
         // atender varios clientes ao mesmo tempo no mesmo ServerSocket.
         try (Socket conexao = cliente;
              BufferedReader entrada = new BufferedReader(new InputStreamReader(

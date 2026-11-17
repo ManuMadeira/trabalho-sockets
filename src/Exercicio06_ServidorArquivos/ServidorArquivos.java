@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public final class ServidorArquivos implements AutoCloseable {
-    // Aqui eu implemento o servidor de arquivos com login simples e streams binarios
-    // para realizar upload e download pela rede TCP.
+    // Servidor de arquivos com login simples e streams binarios para realizar
+    // upload e download pela rede TCP.
     private static final long LIMITE_ARQUIVO = 50L * 1024L * 1024L;
     private final ServerSocket serverSocket;
     private final Path diretorio;
@@ -28,7 +28,7 @@ public final class ServidorArquivos implements AutoCloseable {
     private ServidorArquivos(Path diretorio) throws IOException {
         this.diretorio = diretorio;
         Files.createDirectories(diretorio);
-        // Eu reservo um ServerSocket em uma porta dinamica; ele fica ouvindo passivamente
+        // O ServerSocket fica reservado em uma porta dinamica e ouvindo passivamente
         // ate as operacoes de upload ou download solicitarem uma conexao TCP.
         serverSocket = new ServerSocket(0);
         acceptor = new Thread(this::aceitarClientes, "file-server-acceptor");
@@ -55,9 +55,9 @@ public final class ServidorArquivos implements AutoCloseable {
 
     private void atender(Socket socket) {
         try (Socket cliente = socket;
-             // Eu uso o DataInputStream sobre o InputStream para receber metadados e bytes.
+             // DataInputStream sobre InputStream recebe metadados e bytes.
              DataInputStream entrada = new DataInputStream(cliente.getInputStream());
-             // Eu uso o DataOutputStream sobre o OutputStream para enviar metadados e dados.
+             // DataOutputStream sobre OutputStream envia metadados e dados.
              DataOutputStream saida = new DataOutputStream(cliente.getOutputStream())) {
             String tipo = entrada.readUTF();
             if (!"LOGIN".equalsIgnoreCase(tipo)) {
@@ -93,7 +93,7 @@ public final class ServidorArquivos implements AutoCloseable {
             }
         } catch (IOException e) {
             // Qualquer falha de rede ou de leitura/escrita do arquivo chega como IOException;
-            // eu registro o problema e encerro apenas o atendimento desta conexao.
+            // o problema e registrado e apenas o atendimento desta conexao e encerrado.
             System.err.println("Erro na operação de arquivo: " + e.getMessage());
         }
     }
@@ -195,7 +195,7 @@ public final class ServidorArquivos implements AutoCloseable {
 
     private static void fazerUpload(int porta, String nome, byte[] dados) throws IOException {
         try (Socket cliente = new Socket("127.0.0.1", porta);
-             // Neste cliente ativo eu uso o OutputStream para enviar metadados e bytes,
+             // Neste cliente ativo, o OutputStream envia metadados e bytes,
              // enquanto o InputStream recebe a confirmacao do servidor.
              DataOutputStream saida = new DataOutputStream(cliente.getOutputStream());
              DataInputStream entrada = new DataInputStream(cliente.getInputStream())) {

@@ -3,7 +3,7 @@ package Exercicio04_BancoConcorrente;
 import java.math.BigDecimal;
 
 /**
- * Aqui eu represento uma conta bancaria mantida pelo servidor.
+ * Representa uma conta bancaria mantida pelo servidor.
  * Os metodos sincronizados garantem que depositos, saques e consultas
  * desta conta nao se sobreponham de forma inconsistente.
  */
@@ -11,21 +11,21 @@ public final class Conta {
     private final String numero;
     private BigDecimal saldo;
 
-    // Aqui eu crio a conta com um numero identificador e um saldo inicial.
+    // Inicializa a conta com um numero identificador e um saldo inicial.
     public Conta(String numero, String saldoInicial) {
         this.numero = numero;
         this.saldo = new BigDecimal(saldoInicial);
     }
 
-    // Nesta operacao synchronized eu deposito o valor usando BigDecimal,
+    // Esta operacao synchronized deposita o valor usando BigDecimal,
     // que evita erros de precisao em valores monetarios.
     public synchronized BigDecimal depositar(BigDecimal valor) {
         saldo = saldo.add(valor);
         return saldo;
     }
 
-    // Aqui eu realizo o saque dentro da mesma exclusao synchronized:
-    // primeiro verifico o saldo e somente depois subtraio o valor.
+    // O saque ocorre dentro da mesma exclusao synchronized:
+    // primeiro o saldo e verificado e somente depois o valor e subtraido.
     public synchronized BigDecimal sacar(BigDecimal valor) {
         if (valor.compareTo(saldo) > 0) {
             return null;
@@ -34,14 +34,14 @@ public final class Conta {
         return saldo;
     }
 
-    // Eu sincronizo a leitura para que ela tenha acesso ao mesmo estado
+    // A leitura sincronizada acessa o mesmo estado
     // protegido das operacoes de alteracao da conta.
     public synchronized BigDecimal consultarSaldo() {
         return saldo;
     }
 
-    // Aqui eu realizo todo o historico do deposito dentro de uma unica secao
-    // sincronizada, para que o log da operacao corresponda ao mesmo estado protegido.
+    // O deposito e o registro dos saldos anterior e atualizado ocorrem numa unica
+    // secao sincronizada, mantendo o log correspondente ao estado protegido.
     public synchronized BigDecimal[] depositarComHistorico(BigDecimal valor) {
         BigDecimal saldoAnterior = saldo;
         BigDecimal novoSaldo = saldoAnterior.add(valor);
@@ -49,8 +49,8 @@ public final class Conta {
         return new BigDecimal[]{saldoAnterior, novoSaldo};
     }
 
-    // Aqui eu verifico e altero o saque dentro da mesma secao sincronizada.
-    // Se nao houver saldo suficiente, eu retorno null sem modificar o estado.
+    // A verificacao e a alteracao do saque ocorrem na mesma secao sincronizada.
+    // Sem saldo suficiente, o metodo retorna null sem modificar o estado.
     public synchronized BigDecimal[] sacarComHistorico(BigDecimal valor) {
         BigDecimal saldoAnterior = saldo;
         if (valor.compareTo(saldoAnterior) > 0) {

@@ -53,7 +53,7 @@ public class Main {
                 }
             } catch (IOException e) {
                 // Este bloco trata as excecoes de rede ou entrada/saida propagadas pelos sockets;
-                // assim eu informo a falha sem terminar o menu inteiro.
+                // assim a falha e informada sem encerrar o menu inteiro.
                 System.err.println("Erro de I/O ao executar o exercício: " + e.getMessage());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

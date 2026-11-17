@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public final class ProcessadorInteiros {
-    // Aqui eu represento o lado didatico do exercicio; o servidor aceita uma conexao
-    // sequencial e o cliente envia a sequencia de inteiros pelo mesmo canal TCP.
+    // O servidor aceita uma conexao sequencial e o cliente envia a sequencia
+    // de inteiros pelo mesmo canal TCP.
     private ProcessadorInteiros() {
     }
 
@@ -43,7 +43,7 @@ public final class ProcessadorInteiros {
             System.out.println("[SERVIDOR] Aguardando um unico cliente na porta "
                     + servidor.getLocalPort() + ".");
             try (Socket cliente = new Socket("127.0.0.1", servidor.getLocalPort());
-                 // Eu serializo cada inteiro como texto no OutputStream do Socket.
+                 // Cada inteiro e serializado como texto no OutputStream do Socket.
                  BufferedWriter saida = new BufferedWriter(new OutputStreamWriter(
                          cliente.getOutputStream(), StandardCharsets.UTF_8));
                  // A entrada corresponde ao fluxo recebido pelo processo remoto, decodificado

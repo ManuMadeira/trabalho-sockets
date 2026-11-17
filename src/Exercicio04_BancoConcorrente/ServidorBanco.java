@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Aqui eu implemento o servidor passivo da instituicao financeira.
- * O ServerSocket escuta uma porta; a cada accept(), eu crio uma thread
+ * Servidor passivo da instituicao financeira.
+ * O ServerSocket escuta uma porta; a cada accept(), uma thread e criada
  * independente para atender o Socket ativo do cliente.
  */
 public final class ServidorBanco implements AutoCloseable {
@@ -24,7 +24,7 @@ public final class ServidorBanco implements AutoCloseable {
     private final Thread acceptor;
 
     public ServidorBanco(int porta) throws IOException {
-        // Aqui eu crio o ServerSocket, que fica aguardando solicitacoes de conexao.
+        // O ServerSocket fica aguardando solicitacoes de conexao.
         serverSocket = new ServerSocket(porta);
         contas.put("123", new Conta("123", "1000.00"));
         contas.put("456", new Conta("456", "500.00"));
@@ -39,7 +39,7 @@ public final class ServidorBanco implements AutoCloseable {
     }
 
     private void aceitarClientes() {
-        // Aqui eu continuo esperando novas conexoes. Cada cliente recebe um Socket
+        // O servidor continua esperando novas conexoes. Cada cliente recebe um Socket
         // ativo em accept() e uma thread propria no ExecutorService.
         while (executando.get()) {
             try {
@@ -62,8 +62,8 @@ public final class ServidorBanco implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        // Aqui eu encerro a escuta, desativo o loop de accept() e fechamos as threads
-        // de atendimento junto com a liberacao da porta logica.
+        // O loop de accept() e encerrado, as threads de atendimento sao interrompidas
+        // e a porta logica e liberada.
         executando.set(false);
         serverSocket.close();
         threadsClientes.shutdownNow();

@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * Aqui eu represento a thread dedicada a um unico cliente bancario.
- * O servidor cria uma instancia desta classe para cada Socket aceito,
+ * Thread dedicada a um unico cliente bancario. O servidor cria uma instancia
+ * desta classe para cada Socket aceito,
  * mantendo atendimento independente e concorrente.
  */
 public final class TratadorClienteBanco implements Runnable {
@@ -28,8 +28,8 @@ public final class TratadorClienteBanco implements Runnable {
 
     @Override
     public void run() {
-        // Aqui eu transformo os streams de entrada e saida em texto UTF-8,
-        // criando o protocolo linha a linha usado pelo cliente e pelo servidor.
+        // Os streams de entrada e saida sao convertidos em texto UTF-8,
+        // formando o protocolo linha a linha usado pelo cliente e pelo servidor.
         try (Socket conexao = cliente;
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      conexao.getInputStream(), StandardCharsets.UTF_8));
@@ -73,7 +73,7 @@ public final class TratadorClienteBanco implements Runnable {
                 }
             }
         } catch (IOException e) {
-            // Aqui eu trato falhas de rede sem derrubar o restante das conexoes.
+            // Falhas de rede sao tratadas sem derrubar o restante das conexoes.
             System.err.printf("[ERRO] Conexao do Terminal %d encerrada com IOException: %s%n",
                     terminalId, e.getMessage());
         } finally {

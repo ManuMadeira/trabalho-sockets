@@ -30,7 +30,7 @@ public final class ServidorFortunes implements AutoCloseable {
     private final Thread acceptor;
 
     public ServidorFortunes(int porta) throws IOException {
-        // Aqui eu crio o ponto passivo do servidor TCP. O ServerSocket reserva uma porta
+        // O ServerSocket cria o ponto passivo do servidor TCP e reserva uma porta
         // logica na maquina e aguarda solicitacoes, enquanto o processo continua identificavel
         // pelo endereco IP da interface de rede e por essa porta.
         serverSocket = new ServerSocket(porta);
@@ -46,9 +46,9 @@ public final class ServidorFortunes implements AutoCloseable {
     private void aceitarClientes() {
         while (executando.get()) {
             try {
-                // Nesse ponto o accept() bloqueia o fluxo ate um cliente iniciar o handshake TCP.
-                // O resultado nao e o ServerSocket; e um novo Socket ativo para conversar com
-                // apenas aquele cliente por um canal bidirecional.
+                // O accept() bloqueia o fluxo ate um cliente iniciar o handshake TCP.
+                // O resultado e um novo Socket ativo para conversar com aquele cliente
+                // por um canal bidirecional; o ServerSocket continua escutando.
                 Socket socket = serverSocket.accept();
                 System.out.printf("[CONEXAO] Novo cliente fortunes: IP %s / Porta remota %d%n",
                         socket.getInetAddress().getHostAddress(), socket.getPort());
@@ -63,11 +63,11 @@ public final class ServidorFortunes implements AutoCloseable {
 
     private void atender(Socket socket) {
         try (Socket cliente = socket;
-             // Eu obtenho o InputStream para receber bytes da rede e uso o BufferedReader
-             // para transforma-los em texto UTF-8, linha por linha.
+             // O InputStream recebe bytes da rede e o BufferedReader os transforma
+             // em texto UTF-8, linha por linha.
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));
-             // Pelo OutputStream eu envio os dados serializados como texto em sentido inverso.
+             // Pelo OutputStream sao enviados os dados serializados como texto em sentido inverso.
              // O PrintWriter adiciona o formato de linhas e permite a confirmacao de respostas.
              PrintWriter saida = new PrintWriter(new OutputStreamWriter(
                      cliente.getOutputStream(), StandardCharsets.UTF_8), true)) {
@@ -86,7 +86,7 @@ public final class ServidorFortunes implements AutoCloseable {
                 }
             }
         } catch (IOException e) {
-            // Falhas de rede, leitura ou escrita aparecem como IOException; eu registro o erro
+            // Falhas de rede, leitura ou escrita aparecem como IOException; o erro e registrado
             // sem encerrar todo o servidor.
             System.err.println("Conexão de fortunes encerrada com erro: " + e.getMessage());
         }

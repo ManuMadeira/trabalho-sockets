@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Aqui eu implemento o terminal cliente que solicita depositos, saques
- * e consultas ao servidor por meio de um Socket TCP ativo.
+ * Terminal cliente que solicita depositos, saques e consultas ao servidor
+ * por meio de um Socket TCP ativo.
  */
 public final class ClienteBanco {
     private ClienteBanco() {
@@ -51,7 +51,7 @@ public final class ClienteBanco {
                 }
             }
         } catch (IOException e) {
-            // Aqui eu informo erros de conexao, envio ou leitura da rede.
+            // Erros de conexao, envio ou leitura da rede sao propagados como IOException.
             throw new IOException("[CLIENTE] Falha na comunicacao bancaria: " + e.getMessage(), e);
         }
     }
@@ -69,7 +69,7 @@ public final class ClienteBanco {
     private static void enviarComando(PrintWriter saida, BufferedReader entrada,
                                       String protocolo, String descricao) throws IOException {
         System.out.println(descricao);
-        // Aqui eu serializo o texto no OutputStream do Socket. A quebra de linha
+        // O texto e serializado no OutputStream do Socket. A quebra de linha
         // define o fim da mensagem no protocolo implementado com o servidor.
         saida.println(protocolo);
         String resposta = entrada.readLine();

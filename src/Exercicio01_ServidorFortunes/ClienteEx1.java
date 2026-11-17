@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Aqui eu implemento a ponta cliente do Exercício 1.
- * Eu solicito ao servidor TCP o handshake na porta 5001 e envio comandos
- * textuais pela rede UTF-8.
+ * Esta classe implementa a ponta cliente do Exercício 1.
+ * O cliente solicita ao servidor TCP o handshake na porta 5001 e envia
+ * comandos textuais pela rede usando UTF-8.
  */
 public final class ClienteEx1 {
     public static final String HOST = "127.0.0.1";
@@ -22,8 +22,8 @@ public final class ClienteEx1 {
     }
 
     public static void main(String[] args) {
-        // Aqui o Socket atua ativamente: eu informo o IP do servidor e a porta
-        // logica do processo destino para estabelecer o canal bidirecional.
+        // O Socket atua ativamente: o IP do servidor e a porta logica do processo
+        // de destino estabelecem o canal bidirecional.
         try (Socket cliente = new Socket(HOST, PORTA);
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));
@@ -44,7 +44,7 @@ public final class ClienteEx1 {
                     continue;
                 }
 
-                // Neste ponto eu serializo o texto no OutputStream do Socket.
+                // Neste ponto o texto e serializado no OutputStream do Socket.
                 // Cada println inclui uma quebra de linha que delimita o comando.
                 System.out.println("[CLIENTE] Enviando comando: " + comando);
                 saida.println(comando);
@@ -67,7 +67,7 @@ public final class ClienteEx1 {
             }
             System.out.println("[CLIENTE] Encerrando a conexao com close().");
         } catch (IOException e) {
-            // Aqui eu informo falhas de conexao, envio ou leitura como IOException.
+            // Falhas de conexao, envio ou leitura sao informadas como IOException.
             System.err.println("[ERRO] Falha na comunicacao com o servidor: " + e.getMessage());
         }
     }

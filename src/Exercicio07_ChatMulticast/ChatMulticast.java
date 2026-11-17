@@ -9,6 +9,8 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ChatMulticast {
+    // Aqui eu represento o participante de um chat UDP multicast.
+    // Nao existe ServerSocket nem handshake: eu entro no grupo IP e troco DatagramPacket.
     private static final String GRUPO = "230.0.0.1";
     private static final int PORTA = 4446;
     private static final int TAMANHO_MAXIMO = 8192;
@@ -17,10 +19,15 @@ public final class ChatMulticast {
     }
 
     public static void executar(Scanner scanner) throws IOException {
+        // Aqui eu resolvo o endereco multicast e uso o IP logico do grupo 230.0.0.1
+        // com a porta 4446 para identificar o conjunto de processos participantes.
         InetAddress grupo = InetAddress.getByName(GRUPO);
         AtomicBoolean conectado = new AtomicBoolean(true);
         try (MulticastSocket socket = new MulticastSocket(PORTA)) {
+            // Ao entrar no grupo, meu socket passa a receber datagramas UDP destinados
+            // ao grupo. Ao contrario do TCP, nao existe handshake ou conexao persistente.
             socket.joinGroup(grupo);
+            System.out.printf("[MULTICAST] Participante entrou no grupo %s:%d.%n", GRUPO, PORTA);
             Thread receptor = new Thread(() -> receberMensagens(socket, conectado), "multicast-receiver");
             receptor.setDaemon(true);
             receptor.start();
@@ -42,9 +49,14 @@ public final class ChatMulticast {
                     System.out.println("Mensagem excede o limite de " + TAMANHO_MAXIMO + " bytes.");
                     continue;
                 }
+                // Eu serializo a mensagem em bytes e envio um DatagramPacket contendo dados,
+                // endereco IP do grupo e porta UDP de destino.
                 socket.send(new DatagramPacket(dados, dados.length, grupo, PORTA));
+                System.out.println("[CLIENTE] Mensagem enviada ao grupo: " + mensagem);
             }
             conectado.set(false);
+            // close() e leaveGroup() encerram de forma segura o uso dos recursos do socket
+            // e removem este processo do grupo multicast.
             socket.leaveGroup(grupo);
         } finally {
             conectado.set(false);
@@ -61,9 +73,13 @@ public final class ChatMulticast {
                         StandardCharsets.UTF_8);
                 System.out.println();
                 System.out.println(mensagem);
+                System.out.println("[MULTICAST] Datagram recebido de "
+                        + pacote.getAddress().getHostAddress() + ":" + pacote.getPort());
                 System.out.print("> ");
             } catch (IOException e) {
                 if (conectado.get()) {
+                    // A falha de recepcao aparece como IOException e fica limitada ao receptor
+                    // multicast, sem desaparecer silenciosamente.
                     System.err.println("Erro ao receber mensagem multicast: " + e.getMessage());
                 }
                 return;

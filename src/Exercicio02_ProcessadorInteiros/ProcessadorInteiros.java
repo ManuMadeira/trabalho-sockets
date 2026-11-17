@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public final class ProcessadorInteiros {
+    // Aqui eu represento o lado didatico do exercicio; o servidor aceita uma conexao
+    // sequencial e o cliente envia a sequencia de inteiros pelo mesmo canal TCP.
     private ProcessadorInteiros() {
     }
 
@@ -33,23 +35,33 @@ public final class ProcessadorInteiros {
             }
         }
 
+        // O ServerSocket fica passivo na porta escolhida pelo sistema e aceita o cliente TCP.
         try (ServerSocket servidor = new ServerSocket(0)) {
             Thread worker = new Thread(() -> processarUmaConexao(servidor), "integer-server");
             worker.setDaemon(true);
             worker.start();
+            System.out.println("[SERVIDOR] Aguardando um unico cliente na porta "
+                    + servidor.getLocalPort() + ".");
             try (Socket cliente = new Socket("127.0.0.1", servidor.getLocalPort());
+                 // Eu serializo cada inteiro como texto no OutputStream do Socket.
                  BufferedWriter saida = new BufferedWriter(new OutputStreamWriter(
                          cliente.getOutputStream(), StandardCharsets.UTF_8));
+                 // A entrada corresponde ao fluxo recebido pelo processo remoto, decodificado
+                 // de bytes para texto pelo BufferedReader.
                  BufferedReader entrada = new BufferedReader(new InputStreamReader(
                          cliente.getInputStream(), StandardCharsets.UTF_8))) {
                 for (Integer numero : numeros) {
                     saida.write(numero.toString());
                     saida.newLine();
+                    System.out.println("[CLIENTE] Enviando inteiro: " + numero);
                 }
                 saida.flush();
+                // shutdownOutput() informa ao servidor que este cliente terminou de enviar dados,
+                // mas ainda preserva a leitura da resposta no mesmo canal TCP.
                 cliente.shutdownOutput();
                 String resultado;
                 while ((resultado = entrada.readLine()) != null) {
+                    System.out.println("[SERVIDOR RESPONDEU] " + resultado);
                     System.out.println(resultado);
                 }
             }
@@ -58,10 +70,14 @@ public final class ProcessadorInteiros {
 
     private static void processarUmaConexao(ServerSocket servidor) {
         try (Socket cliente = servidor.accept();
+             // O accept() bloqueia ate chegar uma conexao e devolve o Socket que representa
+             // o canal ativo entre servidor e cliente. Nao confundo este socket com o ServerSocket.
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));
              BufferedWriter saida = new BufferedWriter(new OutputStreamWriter(
                      cliente.getOutputStream(), StandardCharsets.UTF_8))) {
+            System.out.printf("[CONEXAO] Cliente recebido: IP %s / Porta remota %d%n",
+                    cliente.getInetAddress().getHostAddress(), cliente.getPort());
             List<Long> numeros = new ArrayList<Long>();
             String linha;
             while ((linha = entrada.readLine()) != null) {

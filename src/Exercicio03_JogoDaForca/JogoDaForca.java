@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class JogoDaForca {
+    // Aqui eu mantenho a palavra secreta no servidor e troco mensagens de texto
+    // com o cliente ate ele ganhar, perder ou pedir para sair.
     private static final String[] PALAVRAS = {
             "concorrencia", "protocolo", "distribuido", "computador", "biblioteca"
     };
@@ -29,12 +31,15 @@ public final class JogoDaForca {
             Thread worker = new Thread(() -> atenderJogo(servidor), "hangman-server");
             worker.setDaemon(true);
             worker.start();
+            // Aqui eu solicito o estabelecimento da conexao TCP com localhost na porta
+            // escolhida pelo servidor. IP identifica a maquina e a porta identifica o processo.
             try (Socket cliente = new Socket("127.0.0.1", servidor.getLocalPort());
                  BufferedReader entrada = new BufferedReader(new InputStreamReader(
                          cliente.getInputStream(), StandardCharsets.UTF_8));
                  PrintWriter saida = new PrintWriter(new OutputStreamWriter(
                          cliente.getOutputStream(), StandardCharsets.UTF_8), true)) {
                 String inicial = entrada.readLine();
+                System.out.println("[SERVIDOR RESPONDEU] " + inicial);
                 if (inicial == null) {
                     throw new IOException("Não foi possível iniciar a partida.");
                 }
@@ -49,6 +54,7 @@ public final class JogoDaForca {
                         return;
                     }
                     saida.println(palpite);
+                    System.out.println("[CLIENTE] Palpite enviado: " + palpite);
                     String estado = entrada.readLine();
                     if (estado == null) {
                         throw new IOException("Conexão com o servidor do jogo encerrada.");
@@ -64,10 +70,14 @@ public final class JogoDaForca {
 
     private static void atenderJogo(ServerSocket servidor) {
         try (Socket cliente = servidor.accept();
+             // Esta entrada do InputStream recebe os palpites enviados pelo cliente.
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));
+             // Esta saida usa o OutputStream para serializar respostas de texto em bytes.
              PrintWriter saida = new PrintWriter(new OutputStreamWriter(
                      cliente.getOutputStream(), StandardCharsets.UTF_8), true)) {
+            System.out.printf("[CONEXAO] Jogador conectado: IP %s / Porta remota %d%n",
+                    cliente.getInetAddress().getHostAddress(), cliente.getPort());
             String palavra = PALAVRAS[ThreadLocalRandom.current().nextInt(PALAVRAS.length)];
             Set<Character> acertadas = new HashSet<Character>();
             Set<Character> tentadas = new HashSet<Character>();
@@ -76,6 +86,7 @@ public final class JogoDaForca {
 
             String palpite;
             while ((palpite = entrada.readLine()) != null) {
+                System.out.println("[TENTATIVA] Cliente enviou: " + palpite);
                 if ("QUIT".equalsIgnoreCase(palpite.trim())) {
                     saida.println("Partida encerrada pelo jogador. Palavra: " + palavra);
                     break;
@@ -111,6 +122,8 @@ public final class JogoDaForca {
                         + " | tentadas=" + tentadas + " | boneco=" + desenharBoneco(erros));
             }
         } catch (IOException e) {
+            // Em falhas de leitura, escrita ou encerramento inesperado eu trato a IOException
+            // sem confundir o erro da conexao com o funcionamento das demais partes do programa.
             System.err.println("Erro no servidor do Jogo da Forca: " + e.getMessage());
         }
     }

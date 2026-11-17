@@ -30,6 +30,9 @@ public final class ServidorFortunes implements AutoCloseable {
     private final Thread acceptor;
 
     public ServidorFortunes(int porta) throws IOException {
+        // Aqui eu crio o ponto passivo do servidor TCP. O ServerSocket reserva uma porta
+        // logica na maquina e aguarda solicitacoes, enquanto o processo continua identificavel
+        // pelo endereco IP da interface de rede e por essa porta.
         serverSocket = new ServerSocket(porta);
         acceptor = new Thread(this::aceitarClientes, "fortunes-acceptor");
         acceptor.setDaemon(true);
@@ -43,7 +46,12 @@ public final class ServidorFortunes implements AutoCloseable {
     private void aceitarClientes() {
         while (executando.get()) {
             try {
+                // Nesse ponto o accept() bloqueia o fluxo ate um cliente iniciar o handshake TCP.
+                // O resultado nao e o ServerSocket; e um novo Socket ativo para conversar com
+                // apenas aquele cliente por um canal bidirecional.
                 Socket socket = serverSocket.accept();
+                System.out.printf("[CONEXAO] Novo cliente fortunes: IP %s / Porta remota %d%n",
+                        socket.getInetAddress().getHostAddress(), socket.getPort());
                 clientes.execute(() -> atender(socket));
             } catch (IOException e) {
                 if (executando.get()) {
@@ -55,14 +63,21 @@ public final class ServidorFortunes implements AutoCloseable {
 
     private void atender(Socket socket) {
         try (Socket cliente = socket;
+             // Eu obtenho o InputStream para receber bytes da rede e uso o BufferedReader
+             // para transforma-los em texto UTF-8, linha por linha.
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));
+             // Pelo OutputStream eu envio os dados serializados como texto em sentido inverso.
+             // O PrintWriter adiciona o formato de linhas e permite a confirmacao de respostas.
              PrintWriter saida = new PrintWriter(new OutputStreamWriter(
                      cliente.getOutputStream(), StandardCharsets.UTF_8), true)) {
+            System.out.println("[SERVIDOR] Conexao fortunes pronta para receber comandos.");
             String comando;
             while ((comando = entrada.readLine()) != null) {
+                System.out.println("[REQUISICAO] Comando recebido: " + comando);
                 String resposta = processar(comando);
                 saida.println(resposta);
+                System.out.println("[RESPOSTA] Dados enviados ao cliente fortunes.");
                 if ("QUIT".equalsIgnoreCase(comando.trim())) {
                     break;
                 }
@@ -71,6 +86,8 @@ public final class ServidorFortunes implements AutoCloseable {
                 }
             }
         } catch (IOException e) {
+            // Falhas de rede, leitura ou escrita aparecem como IOException; eu registro o erro
+            // sem encerrar todo o servidor.
             System.err.println("Conexão de fortunes encerrada com erro: " + e.getMessage());
         }
     }
@@ -136,12 +153,16 @@ public final class ServidorFortunes implements AutoCloseable {
     @Override
     public void close() throws IOException {
         executando.set(false);
+        // Uso close() para liberar o socket do servidor e a porta, encerrando de forma segura
+        // os recursos de rede desta instancia.
         serverSocket.close();
         clientes.shutdownNow();
     }
 
     public static void executar(Scanner scanner) throws IOException {
         try (ServidorFortunes servidor = new ServidorFortunes(0);
+             // Aqui o Socket atua ativamente: 127.0.0.1 identifica a maquina local
+             // (localhost) e servidor.getPorta() identifica o processo de destino.
              Socket cliente = new Socket("127.0.0.1", servidor.getPorta());
              BufferedReader entrada = new BufferedReader(new InputStreamReader(
                      cliente.getInputStream(), StandardCharsets.UTF_8));

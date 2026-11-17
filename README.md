@@ -22,10 +22,22 @@ terminar.
 | 1 | `Exercicio01_ServidorFortunes` | Servidor TCP concorrente com `GET-FORTUNE`, `ADD-FORTUNE <frase>`, `UPD-FORTUNE <pos> <frase>`, `LST-FORTUNE` e `QUIT`. As posições da lista começam em 1. |
 | 2 | `Exercicio02_ProcessadorInteiros` | Recebe inteiros em linhas TCP até EOF e calcula quantidade, soma, média, máximo e mínimo. |
 | 3 | `Exercicio03_JogoDaForca` | Jogo TCP remoto para um jogador. A palavra é mantida no servidor, que envia o tamanho, as tentativas restantes, o estado e o boneco após cada palpite. |
-| 4 | `Exercicio04_BancoConcorrente` | Servidor TCP concorrente para depósito, saque, consulta de saldo e saída. Operações da conta são sincronizadas; valores usam `BigDecimal`. |
+| 4 | `Exercicio04_BancoConcorrente` | Servidor TCP concorrente para depósito, saque, consulta de saldo e saída. Ao escolher a opção 4 no menu, posso iniciar o servidor ou conectar um terminal cliente em outro processo. Operações da conta são sincronizadas; valores usam `BigDecimal`. |
 | 5 | `Exercicio05_LojasDepartamento` | Simula cinco filiais concorrentes, cada uma com 1500 compras/vendas e atraso curto por operação. As filiais enviam seus totais por TCP ao servidor central, que consolida os resultados. |
 | 6 | `Exercicio06_ServidorArquivos` | Demonstra upload e download TCP com controle de acesso por arquivo: lock exclusivo para gravação e compartilhado para leitura. |
 | 7 | `Exercicio07_ChatMulticast` | Chat em tempo real por UDP multicast no grupo `230.0.0.1`, porta `4446`. Digite `/sair` para voltar ao menu. |
+
+Nos exercícios 1 a 4, o servidor usa `ServerSocket.accept()` e o cliente usa
+`Socket(host, porta)` para estabelecer o canal TCP ativo/passivo. O exercício 1
+usa comandos textuais; o exercício 2 envia inteiros até o EOF da stream; o
+exercício 3 mantém a palavra secreta no servidor da forca; e o exercício 4 pode
+ser iniciado como servidor em uma instancia do programa e como terminal cliente
+em outra instancia, ambas na porta TCP `5004`.
+
+No exercício 6, o cliente demonstra primeiro o login (`aluno` / `socket`) e
+depois envia `UPLOAD` ou `DOWNLOAD`. Os dados são transportados por
+`DataInputStream` e `DataOutputStream`. O exercício 7 envia
+`DatagramPacket` ao grupo multicast `230.0.0.1`, porta UDP `4446`.
 
 As opções 1 a 4 iniciam um servidor TCP local e permitem interagir com ele pelo
 cliente incluído. A opção 5 executa a simulação de filiais; a opção 6 realiza

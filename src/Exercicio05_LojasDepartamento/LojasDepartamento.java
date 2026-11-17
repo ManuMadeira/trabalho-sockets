@@ -16,6 +16,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.LockSupport;
 
 public final class LojasDepartamento {
+    // Aqui eu represento a central e as filiais da rede distribuida.
+    // A central usa um ServerSocket passivo e cada filial usa um Socket ativo.
     private static final int QUANTIDADE_FILIAIS = 5;
     private static final int TRANSACOES_POR_FILIAL = 1500;
 
@@ -25,6 +27,8 @@ public final class LojasDepartamento {
     public static void executar() throws InterruptedException, ExecutionException, IOException {
         System.out.println("Simulando 5 filiais com 1500 compras/vendas por filial...");
         try (ServerSocket central = new ServerSocket(0)) {
+            // Neste modelo a central usa um ServerSocket passivo para receber o resultado de
+            // cada filial; o endereco IP 127.0.0.1 garante que todas se comuniquem localmente.
             ExecutorService servidorCentral = Executors.newSingleThreadExecutor();
             ExecutorService filiais = Executors.newFixedThreadPool(QUANTIDADE_FILIAIS);
             try {
@@ -82,19 +86,31 @@ public final class LojasDepartamento {
 
     private static void enviarResultado(int porta, ResultadoFilial resultado) throws IOException {
         try (Socket cliente = new Socket("127.0.0.1", porta);
+             // O DataOutputStream transforma tipos primitivos em bytes no OutputStream,
+             // permitindo que a central os reconstrua com o mesmo formato.
              DataOutputStream saida = new DataOutputStream(cliente.getOutputStream())) {
+            System.out.printf("[FILIAL %d] Conectando a central na porta %d.%n",
+                    resultado.filial, porta);
             saida.writeInt(resultado.filial);
             saida.writeLong(resultado.compras);
             saida.writeLong(resultado.vendas);
             saida.writeInt(resultado.transacoes);
+            System.out.printf("[FILIAL %d] Resultado enviado: compras R$ %d, vendas R$ %d, operacoes %d.%n",
+                    resultado.filial, resultado.compras, resultado.vendas, resultado.transacoes);
         }
     }
 
     private static Consolidado receberFiliais(ServerSocket servidor) throws IOException {
         Consolidado total = new Consolidado();
         for (int i = 0; i < QUANTIDADE_FILIAIS; i++) {
+            // Aqui accept() bloqueia ate uma filial estabelecer a conexao TCP.
+            // O Socket devolvido representa o canal ativo desta filial com a central.
             try (Socket filial = servidor.accept();
+                 // O DataInputStream le os bytes recebidos pelo InputStream e os reconverte
+                 // nos mesmos tipos primitivos usados pela filial.
                  DataInputStream entrada = new DataInputStream(filial.getInputStream())) {
+                System.out.printf("[CENTRAL] Filial conectada: IP %s / Porta remota %d%n",
+                        filial.getInetAddress().getHostAddress(), filial.getPort());
                 int numero = entrada.readInt();
                 long compras = entrada.readLong();
                 long vendas = entrada.readLong();
@@ -106,6 +122,8 @@ public final class LojasDepartamento {
                 total.compras += compras;
                 total.vendas += vendas;
                 total.transacoes += transacoes;
+                System.out.printf("[CENTRAL] Dados recebidos da filial %d: compras R$ %d, vendas R$ %d.%n",
+                        numero, compras, vendas);
             }
         }
         return total;

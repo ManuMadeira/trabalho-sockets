@@ -52,6 +52,8 @@ public class Main {
                         System.out.println("Opção inválida. Digite um número de 0 a 7.");
                 }
             } catch (IOException e) {
+                // Este bloco trata as excecoes de rede ou entrada/saida propagadas pelos sockets;
+                // assim eu informo a falha sem terminar o menu inteiro.
                 System.err.println("Erro de I/O ao executar o exercício: " + e.getMessage());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

@@ -73,8 +73,6 @@ public final class ChatMulticast {
                         StandardCharsets.UTF_8);
                 System.out.println();
                 System.out.println(mensagem);
-                System.out.println("[MULTICAST] Datagram recebido de "
-                        + pacote.getAddress().getHostAddress() + ":" + pacote.getPort());
                 System.out.print("> ");
             } catch (IOException e) {
                 if (conectado.get()) {
